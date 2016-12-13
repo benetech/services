@@ -74,7 +74,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
   private Button startSync;
   private Button resetServer;
 
-  private SyncAttachmentState syncAttachmentState = SyncAttachmentState.SYNC;
+  private SyncAttachmentState syncAttachmentState = SyncAttachmentState.DOWNLOAD;
   private SyncActions syncAction = SyncActions.IDLE;
 
   @Override
@@ -102,7 +102,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
       try {
         syncAttachmentState = SyncAttachmentState.valueOf(treatment);
       } catch ( IllegalArgumentException e ) {
-        syncAttachmentState = SyncAttachmentState.SYNC;
+        syncAttachmentState = SyncAttachmentState.DOWNLOAD;
       }
     }
 
@@ -126,14 +126,12 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
     accountAuthType = (TextView) view.findViewById(R.id.sync_account_auth_label);
     accountIdentity = (TextView) view.findViewById(R.id.sync_account);
 
-    syncInstanceAttachmentsSpinner = (Spinner) view.findViewById(R.id.sync_instance_attachments);
-
     if ( savedInstanceState != null && savedInstanceState.containsKey(SYNC_ATTACHMENT_TREATMENT) ) {
       String treatment = savedInstanceState.getString(SYNC_ATTACHMENT_TREATMENT);
       try {
         syncAttachmentState = SyncAttachmentState.valueOf(treatment);
       } catch ( IllegalArgumentException e ) {
-        syncAttachmentState = SyncAttachmentState.SYNC;
+        syncAttachmentState = SyncAttachmentState.DOWNLOAD;
       }
     }
 
@@ -145,31 +143,6 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
         syncAction = SyncActions.IDLE;
       }
     }
-
-    ArrayAdapter<CharSequence> instanceAttachmentsAdapter = ArrayAdapter.createFromResource(
-        getActivity(), R.array.sync_attachment_option_names, android.R.layout.select_dialog_item);
-    syncInstanceAttachmentsSpinner.setAdapter(instanceAttachmentsAdapter);
-
-    syncInstanceAttachmentsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override public void onItemSelected(AdapterView<?> parent, View view, int position,
-          long id) {
-        String[] syncAttachmentType =
-            getResources().getStringArray(R.array.sync_attachment_option_values);
-        syncAttachmentState = SyncAttachmentState.valueOf(syncAttachmentType[position]);
-      }
-
-      @Override public void onNothingSelected(AdapterView<?> parent) {
-        String[] syncAttachmentType =
-            getResources().getStringArray(R.array.sync_attachment_option_values);
-        syncAttachmentState = SyncAttachmentState.SYNC;
-        for ( int i = 0 ; i < syncAttachmentType.length ; ++i ) {
-          if ( syncAttachmentType[i].equals(syncAttachmentState.name()) ) {
-            syncInstanceAttachmentsSpinner.setSelection(i);
-            break;
-          }
-        }
-      }
-    });
 
     startSync = (Button) view.findViewById(R.id.sync_start_button);
     startSync.setOnClickListener(new View.OnClickListener() {
@@ -229,15 +202,6 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
       accountIdentity.setText(googleAccount);
     } else {
       accountIdentity.setText("");
-    }
-
-    String[] syncAttachmentValues =
-        getResources().getStringArray(R.array.sync_attachment_option_values);
-    for ( int i = 0 ; i < syncAttachmentValues.length ; ++i ) {
-      if ( syncAttachmentState.name().equals(syncAttachmentValues[i]) ) {
-        syncInstanceAttachmentsSpinner.setSelection(i);
-        break;
-      }
     }
 
     perhapsEnableButtons();
