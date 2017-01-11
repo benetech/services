@@ -71,7 +71,8 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
 
   private Spinner syncInstanceAttachmentsSpinner;
 
-  private Button startSync;
+  private Button startSyncDownload;
+  private Button startSyncUpload;
   private Button resetServer;
 
   private SyncAttachmentState syncAttachmentState = SyncAttachmentState.DOWNLOAD;
@@ -144,9 +145,17 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
       }
     }
 
-    startSync = (Button) view.findViewById(R.id.sync_start_button);
-    startSync.setOnClickListener(new View.OnClickListener() {
+    startSyncDownload = (Button) view.findViewById(R.id.sync_download_button);
+    startSyncDownload.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
+        syncAttachmentState = SyncAttachmentState.DOWNLOAD;
+        onClickSyncNow(v);
+      }
+    });
+    startSyncUpload = (Button) view.findViewById(R.id.sync_upload_button);
+    startSyncUpload.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        syncAttachmentState = SyncAttachmentState.UPLOAD;
         onClickSyncNow(v);
       }
     });
@@ -210,8 +219,9 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
   }
 
   private void disableButtons() {
-    startSync.setEnabled(false);
+    startSyncDownload.setEnabled(false);
     resetServer.setEnabled(false);
+    startSyncUpload.setEnabled(false);
   }
 
   private void perhapsEnableButtons() {
@@ -220,8 +230,9 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
     if ( url == null || url.length() == 0 ) {
       disableButtons();
     } else {
-      startSync.setEnabled(true);
+      startSyncDownload.setEnabled(true);
       resetServer.setEnabled(true);
+      startSyncUpload.setEnabled(true);
     }
   }
 

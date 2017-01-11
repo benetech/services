@@ -256,26 +256,29 @@ public class ProcessRowDataOrchestrateChanges {
           return;
         }
 
-        try {
-          serverUpdateProcessor
-              .updateLocalRowsFromServer(tableResource, te, orderedColumns, fileAttachmentColumns);
-        } catch (Exception e) {
-          exception("synchronizeTableDataRowsAndAttachments -  pulling data down from server", tableId, e,
-              tableLevelResult);
-          return;
+        if(attachmentState == SyncAttachmentState.DOWNLOAD) {
+          try {
+            serverUpdateProcessor
+                    .updateLocalRowsFromServer(tableResource, te, orderedColumns, fileAttachmentColumns);
+          } catch (Exception e) {
+            exception("synchronizeTableDataRowsAndAttachments -  pulling data down from server", tableId, e,
+                    tableLevelResult);
+            return;
+          }
         }
-
         if (tableLevelResult.getSyncOutcome() != SyncOutcome.WORKING) {
           return;
         }
 
-        try {
-          refreshFromServer = localChangesProcessor
-              .pushLocalChanges(tableResource, te, orderedColumns, fileAttachmentColumns);
-        } catch (Exception e) {
-          exception("synchronizeTableDataRowsAndAttachments -  pushing data up to server", tableId, e,
-              tableLevelResult);
-          return;
+        if(attachmentState == SyncAttachmentState.UPLOAD) {
+          try {
+            refreshFromServer = localChangesProcessor
+                    .pushLocalChanges(tableResource, te, orderedColumns, fileAttachmentColumns);
+          } catch (Exception e) {
+            exception("synchronizeTableDataRowsAndAttachments -  pushing data up to server", tableId, e,
+                    tableLevelResult);
+            return;
+          }
         }
 
         if (tableLevelResult.getSyncOutcome() != SyncOutcome.WORKING) {
