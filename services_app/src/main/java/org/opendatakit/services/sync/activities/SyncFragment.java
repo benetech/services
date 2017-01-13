@@ -548,9 +548,14 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
     WebLogger.getLogger(getAppName()).d(TAG,
         "[" + getId() + "] [onClickSyncNow] timestamp: " + System.currentTimeMillis());
     if (areCredentialsConfigured()) {
-      disableButtons();
-      syncAction = SyncActions.SYNC;
-      prepareForSyncAction();
+      if(syncAttachmentState==SyncAttachmentState.UPLOAD && getActivity().getIntent().getStringArrayListExtra("ids")!=null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty()) {
+        disableButtons();
+        syncAction = SyncActions.SYNC;
+        prepareForSyncAction();
+      } else {
+        Toast.makeText(getActivity(), R.string.sync_no_instances_selected, Toast.LENGTH_SHORT).show();
+        WebLogger.getLogger(getAppName()).e(TAG, "No instances selected, aborting upload");
+      }
     }
   }
 

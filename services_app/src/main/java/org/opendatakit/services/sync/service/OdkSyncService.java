@@ -16,6 +16,7 @@
 package org.opendatakit.services.sync.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+
 import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncOverallResult;
@@ -65,6 +67,8 @@ public class OdkSyncService extends Service {
   private Integer lastStartId = null;
   private boolean shutdownActorNotYetStarted = true;
   private boolean isBound = true;
+  private Intent intent;
+  private List<String> choosenFormsIds;
 
   // Scheduled Executor Runnable that runs every RETENTION_PERIOD / 5 intervals
   // to determine whether or not the service can be shut down.
@@ -122,7 +126,7 @@ public class OdkSyncService extends Service {
   @Override public int onStartCommand(Intent intent, int flags, int startId) {
     WebLogger.getLogger(ODKFileUtils.getOdkDefaultAppName()).i(LOGTAG,
         "Sync Service onStartCommand startId: " + startId);
-
+    this.intent=intent;
     boolean wasShutdownActorNotYetStarted;
     synchronized (syncs) {
       lastStartId = startId;
@@ -148,9 +152,9 @@ public class OdkSyncService extends Service {
   public IBinder onBind(Intent intent) {
     WebLogger.getLogger(ODKFileUtils.getOdkDefaultAppName()).i(LOGTAG,
         "Sync Service onBind new client");
-
     possiblyWaitForSyncServiceDebugger();
-
+    this.intent=intent;
+    this.choosenFormsIds =intent.getStringArrayListExtra("ids");
     boolean wasShutdownActorNotYetStarted;
     synchronized (syncs) {
       wasShutdownActorNotYetStarted = shutdownActorNotYetStarted;
@@ -192,7 +196,7 @@ public class OdkSyncService extends Service {
     synchronized (syncs) {
       AppSynchronizer sync = syncs.get(appName);
       if (sync == null) {
-        sync = new AppSynchronizer(this, appName, notificationManager);
+        sync = new AppSynchronizer(this, appName, notificationManager, choosenFormsIds);
         syncs.put(appName, sync);
       }
       return sync;

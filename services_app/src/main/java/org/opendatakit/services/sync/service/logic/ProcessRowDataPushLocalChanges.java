@@ -63,7 +63,6 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
 
   ProcessRowDataPushLocalChanges(SyncExecutionContext sharedContext) {
     super(sharedContext);
-
     setUpdateNotificationBounds(minPercentage, maxPercentage, 1);
   }
 
@@ -247,7 +246,7 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
    */
   public boolean pushLocalChanges(TableResource tableResource,
       TableDefinitionEntry te, OrderedColumns orderedColumns,
-      ArrayList<ColumnDefinition> fileAttachmentColumns)
+      ArrayList<ColumnDefinition> fileAttachmentColumns, List<String> choosenFormsIds)
       throws ServicesAvailabilityException {
 
     // Prepare the tableLevelResult. We'll start it as failure, and only update it
@@ -293,8 +292,18 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
 
 
         String sqlCommand;
-        Object[] bindArgs = new Object[]{
-            SyncState.new_row.name(), SyncState.changed.name(), SyncState.deleted.name() };
+        StringBuilder idsBindHelperBuilder = new StringBuilder();
+        for(String id : choosenFormsIds){
+          idsBindHelperBuilder.append(", ?");
+        }
+        idsBindHelperBuilder.deleteCharAt(0);
+
+        ArrayList <String> prepareBindArgs = new ArrayList();
+        prepareBindArgs.addAll(choosenFormsIds);
+        prepareBindArgs.add(0, SyncState.deleted.name());
+        prepareBindArgs.add(0, SyncState.changed.name());
+        prepareBindArgs.add(0, SyncState.new_row.name());
+        Object[] bindArgs = prepareBindArgs.toArray();
         {
           StringBuilder sqlCommandBuilder = new StringBuilder();
           sqlCommandBuilder.append("INSERT INTO ").append(local_id_table)
@@ -304,10 +313,12 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
               .append(" IN (?, ?, ?) AND ")
               .append(DataTableColumns.ID).append(" NOT IN (SELECT DISTINCT ")
               .append(DataTableColumns.ID).append(" FROM ").append(tableId).append(" WHERE ")
-              .append(DataTableColumns.SAVEPOINT_TYPE).append(" IS NULL)");
+              .append(DataTableColumns.SAVEPOINT_TYPE).append(" IS NULL)").append(" AND ")
+              .append(DataTableColumns.ID).append(" IN ").append("(")
+              .append(idsBindHelperBuilder.toString()).append(")");
+
           sqlCommand = sqlCommandBuilder.toString();
         }
-
         // create the list of IDs
         sc.getDatabaseService().privilegedExecute(sc.getAppName(), db, sqlCommand, bindArgs);
 
