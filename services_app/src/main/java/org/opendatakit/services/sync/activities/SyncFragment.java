@@ -548,7 +548,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
     WebLogger.getLogger(getAppName()).d(TAG,
         "[" + getId() + "] [onClickSyncNow] timestamp: " + System.currentTimeMillis());
     if (areCredentialsConfigured()) {
-      if(syncAttachmentState==SyncAttachmentState.UPLOAD && getActivity().getIntent().getStringArrayListExtra("ids")!=null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty()) {
+      if(syncAttachmentState!=SyncAttachmentState.UPLOAD || (getActivity().getIntent().getStringArrayListExtra("ids")!=null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty())) {
         disableButtons();
         syncAction = SyncActions.SYNC;
         prepareForSyncAction();
