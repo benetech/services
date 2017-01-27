@@ -51,11 +51,11 @@ public class OdkSyncService extends Service {
   private static final String LOGTAG = "OdkSyncService";
 
   // Time Unit: milliseconds.
-  // 5 minutes. Amount of time to hold onto the details of a sync outcome.
+  // 3 seconds. Amount of time to hold onto the details of a sync outcome.
   // after this amount of time, if there are no outstanding sync actions
   // and if there are no active bindings, then the sync service will shut
   // down.
-  public static final long RETENTION_PERIOD = 300000L;
+  public static final long RETENTION_PERIOD = 3000L;
 
   private OdkSyncServiceInterfaceImpl serviceInterface;
   private GlobalSyncNotificationManager notificationManager;

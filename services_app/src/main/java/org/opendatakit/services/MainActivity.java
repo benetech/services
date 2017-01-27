@@ -90,12 +90,6 @@ public class MainActivity extends Activity implements IAppAwareActivity {
     // automatically handle clicks on the Home/Up button, so long
     // as you specify a parent activity in AndroidManifest.xml.
     int id = item.getItemId();
-    if (id == R.id.action_sync) {
-      Intent i = new Intent(this, SyncActivity.class);
-      i.putExtra(IntentConsts.INTENT_KEY_APP_NAME, getAppName());
-      startActivityForResult(i, SYNC_ACTIVITY_RESULT_CODE);
-      return true;
-    }
 
     if (id == R.id.action_verify_server_settings) {
       Intent i = new Intent(this, VerifyServerSettingsActivity.class);
