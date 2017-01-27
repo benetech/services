@@ -246,7 +246,7 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
    */
   public boolean pushLocalChanges(TableResource tableResource,
       TableDefinitionEntry te, OrderedColumns orderedColumns,
-      ArrayList<ColumnDefinition> fileAttachmentColumns, List<String> choosenFormsIds)
+      ArrayList<ColumnDefinition> fileAttachmentColumns, List<String> selectedFormsIds)
       throws ServicesAvailabilityException {
 
     // Prepare the tableLevelResult. We'll start it as failure, and only update it
@@ -293,13 +293,13 @@ class ProcessRowDataPushLocalChanges extends ProcessRowDataSharedBase {
 
         String sqlCommand;
         StringBuilder idsBindHelperBuilder = new StringBuilder();
-        for(String id : choosenFormsIds){
+        for(String id : selectedFormsIds){
           idsBindHelperBuilder.append(", ?");
         }
         idsBindHelperBuilder.deleteCharAt(0);
 
         ArrayList <String> prepareBindArgs = new ArrayList();
-        prepareBindArgs.addAll(choosenFormsIds);
+        prepareBindArgs.addAll(selectedFormsIds);
         prepareBindArgs.add(0, SyncState.deleted.name());
         prepareBindArgs.add(0, SyncState.changed.name());
         prepareBindArgs.add(0, SyncState.new_row.name());

@@ -68,7 +68,7 @@ public class OdkSyncService extends Service {
   private boolean shutdownActorNotYetStarted = true;
   private boolean isBound = true;
   private Intent intent;
-  private List<String> choosenFormsIds;
+  private List<String> selectedFormsIds;
 
   // Scheduled Executor Runnable that runs every RETENTION_PERIOD / 5 intervals
   // to determine whether or not the service can be shut down.
@@ -154,7 +154,7 @@ public class OdkSyncService extends Service {
         "Sync Service onBind new client");
     possiblyWaitForSyncServiceDebugger();
     this.intent=intent;
-    this.choosenFormsIds =intent.getStringArrayListExtra("ids");
+    this.selectedFormsIds =intent.getStringArrayListExtra("ids");
     boolean wasShutdownActorNotYetStarted;
     synchronized (syncs) {
       wasShutdownActorNotYetStarted = shutdownActorNotYetStarted;
@@ -196,7 +196,7 @@ public class OdkSyncService extends Service {
     synchronized (syncs) {
       AppSynchronizer sync = syncs.get(appName);
       if (sync == null) {
-        sync = new AppSynchronizer(this, appName, notificationManager, choosenFormsIds);
+        sync = new AppSynchronizer(this, appName, notificationManager, selectedFormsIds);
         syncs.put(appName, sync);
       }
       return sync;

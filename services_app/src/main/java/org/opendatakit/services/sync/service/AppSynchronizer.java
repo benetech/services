@@ -55,9 +55,9 @@ public class AppSynchronizer {
   private SyncTask curTask;
   private SyncNotification syncProgress;
   private SyncOverallResult syncResult;
-  private List<String> choosenFormsIds;
+  private List<String> selectedFormsIds;
 
-  AppSynchronizer(Service srvc, String appName, GlobalSyncNotificationManager notificationManager, List<String> choosenFormsIds) {
+  AppSynchronizer(Service srvc, String appName, GlobalSyncNotificationManager notificationManager, List<String> selectedFormsIds) {
     this.service = srvc;
     this.appName = appName;
     this.status = SyncStatus.NONE;
@@ -65,13 +65,13 @@ public class AppSynchronizer {
     this.globalNotifManager = notificationManager;
     this.syncProgress = new SyncNotification(srvc, appName);
     this.syncResult = new SyncOverallResult();
-    this.choosenFormsIds = choosenFormsIds;
+    this.selectedFormsIds = selectedFormsIds;
   }
 
   public synchronized boolean synchronize(boolean push, SyncAttachmentState attachmentState) {
     if (curThread == null) {
       curTask = new SyncTask(((AppAwareApplication) service.getApplication()), push,
-          attachmentState, choosenFormsIds);
+          attachmentState, selectedFormsIds);
       threadStartTime = System.currentTimeMillis();
       curThread = new Thread(curTask);
       status = SyncStatus.SYNCING;
@@ -148,7 +148,7 @@ public class AppSynchronizer {
     private final boolean onlyVerifySettings;
     private final boolean push;
     private final SyncAttachmentState attachmentState;
-    private List<String> choosenFormsIds;
+    private List<String> selectedFormsIds;
 
     public SyncTask(AppAwareApplication application) {
       this.application = application;
@@ -157,12 +157,12 @@ public class AppSynchronizer {
       this.attachmentState = SyncAttachmentState.NONE;
     }
 
-    public SyncTask(AppAwareApplication application, boolean push, SyncAttachmentState attachmentState, List<String> choosenFormsIds) {
+    public SyncTask(AppAwareApplication application, boolean push, SyncAttachmentState attachmentState, List<String> selectedFormsIds) {
       this.application = application;
       this.onlyVerifySettings = false;
       this.push = push;
       this.attachmentState = attachmentState;
-      this.choosenFormsIds = choosenFormsIds;
+      this.selectedFormsIds = selectedFormsIds;
     }
 
     @Override
@@ -303,7 +303,7 @@ public class AppSynchronizer {
           // experienced a table-level sync failure in the preceeding step.
 
           try {
-            rowDataProcessor.synchronizeDataRowsAndAttachments(workingListOfTables, attachmentState, choosenFormsIds);
+            rowDataProcessor.synchronizeDataRowsAndAttachments(workingListOfTables, attachmentState, selectedFormsIds);
           } catch (ServicesAvailabilityException e) {
             WebLogger.getLogger(appName).printStackTrace(e);
           } finally {
