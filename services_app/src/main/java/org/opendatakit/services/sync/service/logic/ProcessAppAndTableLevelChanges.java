@@ -29,6 +29,7 @@ import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.provider.FormsColumns;
 import org.opendatakit.services.sync.service.OdkSyncService;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
+import org.opendatakit.services.sync.service.exceptions.ClientDetectedMissingConfigForClientVersionException;
 import org.opendatakit.utilities.ODKFileUtils;
 import org.opendatakit.builder.PropertiesFileUtils;
 import org.opendatakit.logging.WebLogger;
@@ -41,6 +42,7 @@ import org.opendatakit.services.sync.service.exceptions.SchemaMismatchException;
 import org.opendatakit.services.sync.service.logic.Synchronizer.OnTablePropertiesChanged;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -355,6 +357,16 @@ public class ProcessAppAndTableLevelChanges {
     try {
       manifestProcessor.syncAppLevelFiles(pushToServer, tableList.getAppLevelManifestETag(), sc);
       sc.setAppLevelSyncOutcome(SyncOutcome.SUCCESS);
+    } catch (ClientDetectedMissingConfigForClientVersionException e) {
+      try {
+        manifestProcessor.syncAppLevelFiles(!pushToServer, tableList.getAppLevelManifestETag(), sc);
+        sc.setAppLevelSyncOutcome(SyncOutcome.SUCCESS);
+      } catch (Exception e1) {
+        log.e(TAG,
+                "[synchronizeConfigurationAndContent] exception while trying to synchronize app-level files.");
+        sc.setAppLevelSyncOutcome(sc.exceptionEquivalentOutcome(e1));
+        return new ArrayList<TableResource>();
+      }
     } catch (Exception e) {
       // TODO: update a synchronization result to report back to them as well.
       log.e(TAG,
