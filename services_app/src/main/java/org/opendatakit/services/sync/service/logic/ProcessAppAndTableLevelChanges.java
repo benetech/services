@@ -27,6 +27,7 @@ import org.opendatakit.database.data.OrderedColumns;
 import org.opendatakit.database.data.TableDefinitionEntry;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.provider.FormsColumns;
+import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.services.sync.service.OdkSyncService;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
 import org.opendatakit.services.sync.service.exceptions.ClientDetectedMissingConfigForClientVersionException;
@@ -42,7 +43,6 @@ import org.opendatakit.services.sync.service.exceptions.SchemaMismatchException;
 import org.opendatakit.services.sync.service.logic.Synchronizer.OnTablePropertiesChanged;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -244,6 +244,7 @@ public class ProcessAppAndTableLevelChanges {
 
     // get tables from server
     TableResourceList tableList;
+    TableResourceClient officeIdTable;
     List<TableResource> tables = new ArrayList<TableResource>();
     // For now, repeatedly do this until we get all of the tables on the server.
     // This will likely need to change if we actually have 1000's of them...
@@ -252,6 +253,13 @@ public class ProcessAppAndTableLevelChanges {
       try {
         tableList = sc.getSynchronizer().getTables(webSafeResumeCursor);
         if (tableList != null && tableList.getTables() != null) {
+            /*for(TableResource resource : tableList.getTables()) {
+                officeIdTable = sc.getSynchronizer().getTable(resource.getTableId());
+                if(officeIdTable.getOfficeId().equals("1")) {
+                    TableResource tableResource = officeIdTable.transform(officeIdTable);
+                    tables.add(tableResource);
+                }
+            }*/
           tables.addAll(tableList.getTables());
         }
       } catch (Exception e) {

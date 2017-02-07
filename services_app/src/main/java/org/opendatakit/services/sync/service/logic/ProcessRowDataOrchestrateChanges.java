@@ -29,6 +29,7 @@ import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.provider.FormsColumns;
 import org.opendatakit.services.R;
+import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncOutcome;
@@ -237,8 +238,8 @@ public class ProcessRowDataOrchestrateChanges {
         sc.updateNotification(SyncProgressState.ROWS,
             R.string.sync_verifying_table_schema_on_server, new Object[] { tableId }, 0.0, false);
 
-
-        TableResource tableResource = sc.getSynchronizer().getTable(tableId);
+        TableResourceClient resourceClient = sc.getSynchronizer().getTable(tableId);
+        TableResource tableResource = resourceClient.transform(resourceClient);
 
         // test that the schemaETag matches
         // if it doesn't, the user MUST sync app-level files and

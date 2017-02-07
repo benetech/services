@@ -23,7 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.odktables.rest.entity.*;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.database.data.OrderedColumns;
+import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncProgressState;
 import org.opendatakit.services.sync.service.exceptions.HttpClientWebException;
@@ -146,7 +149,7 @@ public interface Synchronizer {
    * @throws HttpClientWebException
    * @throws IOException
    */
-  TableResource getTable(String tableId) throws HttpClientWebException, IOException;
+  TableResourceClient getTable(String tableId) throws HttpClientWebException, IOException;
 
   /**
    * Discover the schema for a table resource.

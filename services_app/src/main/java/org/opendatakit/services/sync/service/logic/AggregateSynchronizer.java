@@ -59,6 +59,7 @@ import org.opendatakit.httpclientandroidlib.util.EntityUtils;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.provider.DataTableColumns;
+import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
 import org.opendatakit.services.sync.service.exceptions.AccessDeniedException;
 import org.opendatakit.services.sync.service.exceptions.BadClientConfigException;
@@ -84,7 +85,6 @@ import java.net.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -295,10 +295,10 @@ public class AggregateSynchronizer implements Synchronizer {
   }
 
   @Override
-  public TableResource getTable(String tableId) throws
-      HttpClientWebException, IOException {
+  public TableResourceClient getTable(String tableId) throws
+          HttpClientWebException, IOException {
 
-    TableResource tableResource = null;
+    TableResourceClient tableResource = null;
     HttpGet request = new HttpGet();
     CloseableHttpResponse response = null;
 
@@ -311,7 +311,7 @@ public class AggregateSynchronizer implements Synchronizer {
 
       String res = wrapper.convertResponseToString(response);
 
-      tableResource = ODKFileUtils.mapper.readValue(res, TableResource.class);
+      tableResource = ODKFileUtils.mapper.readValue(res, TableResourceClient.class);
 
       return tableResource;
     } finally {
