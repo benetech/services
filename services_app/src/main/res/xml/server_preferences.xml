@@ -37,5 +37,12 @@
 			android:defaultValue=""
 			android:title="@string/selected_google_account_text"
 			android:persistent="false" />
+		<EditTextPreference
+			android:id="@+id/officeID"
+			android:key="common.officeID"
+			android:title="Office ID"
+			android:inputType="textNoSuggestions"
+			android:dialogTitle="Change Office ID"
+			android:persistent="false"/>
 	</PreferenceCategory>
 </PreferenceScreen>
