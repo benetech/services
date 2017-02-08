@@ -14,6 +14,13 @@
 
 package org.opendatakit.services.sync.service.logic;
 
+import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.preference.PreferenceManager;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.opendatakit.aggregate.odktables.rest.ElementDataType;
@@ -65,6 +72,8 @@ public class ProcessAppAndTableLevelChanges {
   
   private final SyncExecutionContext sc;
   private final ProcessManifestContentAndFileChanges manifestProcessor;
+    private Context context;
+    private final String PREFS_NAME = "MyPrefsFile";
 
   public ProcessAppAndTableLevelChanges(SyncExecutionContext sc) {
     this.sc = sc;
@@ -253,14 +262,13 @@ public class ProcessAppAndTableLevelChanges {
       try {
         tableList = sc.getSynchronizer().getTables(webSafeResumeCursor);
         if (tableList != null && tableList.getTables() != null) {
-            /*for(TableResource resource : tableList.getTables()) {
+            for(TableResource resource : tableList.getTables()) {
                 officeIdTable = sc.getSynchronizer().getTable(resource.getTableId());
-                if(officeIdTable.getOfficeId().equals("1")) {
+                if(officeIdTable.getOfficeId().equals(sc.getOfficeId())) {
                     TableResource tableResource = officeIdTable.transform(officeIdTable);
                     tables.add(tableResource);
                 }
-            }*/
-          tables.addAll(tableList.getTables());
+            }
         }
       } catch (Exception e) {
         log.e(TAG,
