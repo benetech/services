@@ -18,12 +18,16 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.widget.Toast;
+
+import org.apache.commons.fileupload.FileUploadBase;
 import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.services.preferences.activities.IOdkAppPropertiesActivity;
 import org.opendatakit.properties.CommonToolProperties;
@@ -31,9 +35,16 @@ import org.opendatakit.properties.PropertiesSingleton;
 import org.opendatakit.services.preferences.PasswordPreferenceScreen;
 import org.opendatakit.services.R;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class ServerSettingsFragment extends PreferenceFragment implements OnPreferenceChangeListener {
 
@@ -43,6 +54,9 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
   private ListPreference mSignOnCredentialPreference;
   private EditTextPreference mUsernamePreference;
   private ListPreference mSelectedGoogleAccountPreference;
+  private EditTextPreference mOfficeId;
+  private SharedPreferences prefs;
+    private String value1;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -265,6 +279,13 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
          !googleAccountAvailable) ) {
       serverCategory.setTitle(R.string.server_restrictions_apply);
     }
+
+      mOfficeId = (EditTextPreference) findPreference("common.officeID");
+      String officeId = getOfficeIdFromFile();
+      mOfficeId.setSummary(officeId);
+      mOfficeId.setText(officeId);
+
+      mOfficeId.setOnPreferenceChangeListener(this);
   }
 
   @Override
@@ -320,6 +341,37 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
     return returnFilter;
   }
 
+    private void saveOfficeIdToFile(String value)
+    {
+        try {
+            String filename = "settings.txt";
+            FileOutputStream file = getActivity().getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(file);
+            writer.write(value.toString());
+            writer.close();
+            file.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getOfficeIdFromFile() {
+        try {
+            String filename = "settings.txt";
+            FileInputStream file = getActivity().getApplicationContext().openFileInput(filename);
+            InputStreamReader reader = new InputStreamReader(file);
+            char[] inputBuffer = new char[100];
+            int i = reader.read(inputBuffer);
+            String content = new String(inputBuffer, 0, i);
+            reader.close();
+            file.close();
+            return content;
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
   /**
    * Generic listener that sets the summary to the newly selected/entered value
    */
@@ -331,6 +383,8 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
       props.setProperty(preference.getKey(), newValue.toString());
       props.setProperty(CommonToolProperties.KEY_ROLES_LIST, "");
       props.setProperty(CommonToolProperties.KEY_USERS_LIST, "");
+    } else if(preference.getKey().equals("common.officeID")) {
+        saveOfficeIdToFile(newValue.toString());
     } else {
       throw new IllegalStateException("Unexpected case");
     }

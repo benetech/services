@@ -20,8 +20,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +33,7 @@ import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
+import org.opendatakit.services.preferences.fragments.ServerSettingsFragment;
 import org.opendatakit.sync.service.SyncNotification;
 import org.opendatakit.sync.service.SyncOutcome;
 import org.opendatakit.sync.service.SyncOverallResult;
@@ -47,7 +50,11 @@ import org.opendatakit.services.sync.service.logic.Synchronizer;
 import org.opendatakit.services.sync.service.logic.Synchronizer.SynchronizerStatus;
 import org.sqlite.database.sqlite.SQLiteException;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 public class SyncExecutionContext implements SynchronizerStatus {
@@ -77,6 +84,7 @@ public class SyncExecutionContext implements SynchronizerStatus {
   private final String googleAccount;
   private final String username;
   private final String password;
+  private final String officeId;
 
   private final SyncNotification syncProgress;
 
@@ -104,10 +112,28 @@ public class SyncExecutionContext implements SynchronizerStatus {
     this.googleAccount = props.getProperty(CommonToolProperties.KEY_ACCOUNT);
     this.username = props.getProperty(CommonToolProperties.KEY_USERNAME);
     this.password = props.getProperty(CommonToolProperties.KEY_PASSWORD);
+    this.officeId = getOfficeIdFromFile();//settings.getString("officeId", null);
 
     this.nMajorSyncSteps = 1;
     this.GRAINS_PER_MAJOR_SYNC_STEP = (OVERALL_PROGRESS_BAR_LENGTH / nMajorSyncSteps);
     this.iMajorSyncStep = 0;
+  }
+
+  private String getOfficeIdFromFile() {
+      try {
+          String filename = "settings.txt";
+          FileInputStream file = application.openFileInput(filename);
+          InputStreamReader reader = new InputStreamReader(file);
+          char[] inputBuffer = new char[100];
+          int i = reader.read(inputBuffer);
+          String content = new String(inputBuffer, 0, i);
+          reader.close();
+          file.close();
+          return content;
+      } catch(IOException e) {
+          e.printStackTrace();
+      }
+      return null;
   }
 
   public void setSynchronizer(Synchronizer synchronizer) {
@@ -226,7 +252,11 @@ public class SyncExecutionContext implements SynchronizerStatus {
     return password;
   }
 
-  public void setRolesList(String value) {
+    public String getOfficeId() {
+        return officeId;
+    }
+
+    public void setRolesList(String value) {
     PropertiesSingleton props = CommonToolProperties.get(application, appName);
 
     props.setProperty(CommonToolProperties.KEY_ROLES_LIST, value);
