@@ -39,6 +39,8 @@ import org.opendatakit.services.sync.service.logic.ProcessAppAndTableLevelChange
 import org.opendatakit.services.sync.service.logic.Synchronizer;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class AppSynchronizer {
 
@@ -372,7 +374,14 @@ public class AppSynchronizer {
       }
 
       // stop the in-progress notification and report an overall success/failure
-      setFinalNotification(status, false, tablesWithProblems, attachmentsFailed);
+      final int finalTablesWithProblems = tablesWithProblems;
+      final int finalAttachmentsFailed = attachmentsFailed;
+      new Timer().schedule(new TimerTask() {
+        @Override
+        public void run() {
+          setFinalNotification(status, false, finalTablesWithProblems, finalAttachmentsFailed);
+        }
+      }, 100);
     }
 
   private void verifySettings(SyncNotification syncProgress) {

@@ -56,7 +56,6 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
   private ListPreference mSelectedGoogleAccountPreference;
   private EditTextPreference mOfficeId;
   private SharedPreferences prefs;
-    private String value1;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -282,8 +281,10 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
 
       mOfficeId = (EditTextPreference) findPreference("common.officeID");
       String officeId = getOfficeIdFromFile();
-      mOfficeId.setSummary(officeId);
-      mOfficeId.setText(officeId);
+      if(officeId != null && !officeId.equals("null")) {
+          mOfficeId.setSummary(officeId);
+          mOfficeId.setText(officeId);
+      }
 
       mOfficeId.setOnPreferenceChangeListener(this);
   }
@@ -347,7 +348,9 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
             String filename = "settings.txt";
             FileOutputStream file = getActivity().getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
             OutputStreamWriter writer = new OutputStreamWriter(file);
-            writer.write(value.toString());
+            if(value.equals(""))
+                value = "null";
+            writer.write(value);
             writer.close();
             file.close();
         } catch(IOException e) {

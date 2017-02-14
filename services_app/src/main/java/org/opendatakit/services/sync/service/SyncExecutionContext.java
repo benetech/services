@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.provider.Settings.Secure;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
@@ -85,6 +86,7 @@ public class SyncExecutionContext implements SynchronizerStatus {
   private final String username;
   private final String password;
   private final String officeId;
+  private final String deviceId;
 
   private final SyncNotification syncProgress;
 
@@ -112,9 +114,11 @@ public class SyncExecutionContext implements SynchronizerStatus {
     this.googleAccount = props.getProperty(CommonToolProperties.KEY_ACCOUNT);
     this.username = props.getProperty(CommonToolProperties.KEY_USERNAME);
     this.password = props.getProperty(CommonToolProperties.KEY_PASSWORD);
-    this.officeId = getOfficeIdFromFile();//settings.getString("officeId", null);
+    this.officeId = getOfficeIdFromFile();
+    this.deviceId = Secure.getString(context.getContentResolver(),
+              Secure.ANDROID_ID);
 
-    this.nMajorSyncSteps = 1;
+      this.nMajorSyncSteps = 1;
     this.GRAINS_PER_MAJOR_SYNC_STEP = (OVERALL_PROGRESS_BAR_LENGTH / nMajorSyncSteps);
     this.iMajorSyncStep = 0;
   }
@@ -254,6 +258,10 @@ public class SyncExecutionContext implements SynchronizerStatus {
 
     public String getOfficeId() {
         return officeId;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
     }
 
     public void setRolesList(String value) {
