@@ -70,6 +70,7 @@ public class HttpRestProtocolWrapper {
   // parameters for queries that could return a lot of data...
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
+  public static final String DEVICE_ID = "deviceId";
 
   // parameter for file downloads -- if we want to have it come down as an attachment.
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
@@ -402,7 +403,7 @@ public class HttpRestProtocolWrapper {
   }
 
   public URI constructTableDataUri(String tableIdDataUri, String websafeResumeCursor,
-      int fetchLimit) {
+      int fetchLimit, String deviceId) {
     URI uri = URI.create(tableIdDataUri);
 
     try {
@@ -416,6 +417,9 @@ public class HttpRestProtocolWrapper {
             .addParameter(HttpRestProtocolWrapper.CURSOR_PARAMETER, websafeResumeCursor)
                 .build();
       }
+
+      uri = new URIBuilder(uri.toString())
+              .addParameter(HttpRestProtocolWrapper.DEVICE_ID, deviceId).build();
     } catch (URISyntaxException e) {
       log.printStackTrace(e);
       throw new IllegalStateException("should never be possible");
@@ -425,7 +429,7 @@ public class HttpRestProtocolWrapper {
   }
 
   public URI constructTableDataDiffUri(String tableIdDiffUri, String dataETag, String websafeResumeCursor,
-      int fetchLimit) {
+      int fetchLimit, String deviceId) {
 
     URI uri = URI.create(tableIdDiffUri);
 
@@ -439,6 +443,8 @@ public class HttpRestProtocolWrapper {
         uri = new URIBuilder(uri.toString())
             .addParameter(HttpRestProtocolWrapper.CURSOR_PARAMETER, websafeResumeCursor).build();
       }
+      uri = new URIBuilder(uri.toString())
+              .addParameter(HttpRestProtocolWrapper.DEVICE_ID, deviceId).build();
     } catch (URISyntaxException e) {
       log.printStackTrace(e);
       throw new IllegalStateException("should never be possible");

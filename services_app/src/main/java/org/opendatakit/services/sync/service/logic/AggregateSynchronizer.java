@@ -27,7 +27,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
-import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
@@ -59,6 +58,7 @@ import org.opendatakit.httpclientandroidlib.util.EntityUtils;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.provider.DataTableColumns;
+import org.opendatakit.services.forms.RowList;
 import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
 import org.opendatakit.services.sync.service.exceptions.AccessDeniedException;
@@ -480,9 +480,9 @@ public class AggregateSynchronizer implements Synchronizer {
     CloseableHttpResponse response = null;
 
     if ((table.getDataETag() == null) || dataETag == null) {
-      uri = wrapper.constructTableDataUri(table.getDataUri(), websafeResumeCursor, fetchLimit);
+      uri = wrapper.constructTableDataUri(table.getDataUri(), websafeResumeCursor, fetchLimit, sc.getDeviceId());
     } else {
-      uri = wrapper.constructTableDataDiffUri(table.getDiffUri(), dataETag, websafeResumeCursor, fetchLimit);
+      uri = wrapper.constructTableDataDiffUri(table.getDiffUri(), dataETag, websafeResumeCursor, fetchLimit, sc.getDeviceId());
     }
 
     wrapper.buildNoContentJsonResponseRequest(uri, request);
@@ -534,7 +534,8 @@ public class AggregateSynchronizer implements Synchronizer {
       row.setDeleted(isDeleted);
       rows.add(row);
     }
-    RowList rlist = new RowList(rows, resource.getDataETag());
+   RowList rlist = new RowList(rows, resource.getDataETag());
+   rlist.setDeviceId(sc.getDeviceId());
 
     HttpPut request = new HttpPut();
     CloseableHttpResponse response = null;

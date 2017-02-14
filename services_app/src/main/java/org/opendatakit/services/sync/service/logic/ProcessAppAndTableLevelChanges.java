@@ -264,7 +264,7 @@ public class ProcessAppAndTableLevelChanges {
         if (tableList != null && tableList.getTables() != null) {
             for(TableResource resource : tableList.getTables()) {
                 officeIdTable = sc.getSynchronizer().getTable(resource.getTableId());
-                if(officeIdTable.getOfficeId().equals(sc.getOfficeId())) {
+                if(checkOfficeId(officeIdTable)) {
                     TableResource tableResource = officeIdTable.transform(officeIdTable);
                     tables.add(tableResource);
                 }
@@ -937,6 +937,11 @@ public class ProcessAppAndTableLevelChanges {
     SyncOutcome outcome = sc.exceptionEquivalentOutcome(e);
     tableLevelResult.setSyncOutcome(outcome);
     tableLevelResult.setMessage(fmtMsg);
+  }
+
+  private boolean checkOfficeId(TableResourceClient officeIdTable)
+  {
+    return (sc.getOfficeId() != null && officeIdTable.getOfficeId().equals(sc.getOfficeId()));
   }
 
 }
