@@ -305,17 +305,6 @@ public class ProcessAppAndTableLevelChanges {
       }
     }
 
-    // Fail if we are pushing up to the server and we have no local tables
-    // (i.e., the device is "clean").
-    if ( pushToServer && (localTableIds.isEmpty() ||
-         (localTableIds.size() == 1 && localTableIds.contains(FormsColumns.COMMON_BASE_FORM_ID)) )) {
-      sc.setAppLevelSyncOutcome(SyncOutcome.NO_LOCAL_TABLES_TO_RESET_ON_SERVER);
-      log.e(TAG,
-          "[synchronizeConfigurationAndContent] push to server from device without any table "
-              + "definitions");
-      return new ArrayList<TableResource>();
-    }
-
     // Fail if we are syncing (pulling) and there are no tables on the server
     if ( !pushToServer && tables.isEmpty() ) {
       sc.setAppLevelSyncOutcome(SyncOutcome.NO_TABLES_ON_SERVER_TO_SYNC);
@@ -373,16 +362,6 @@ public class ProcessAppAndTableLevelChanges {
     try {
       manifestProcessor.syncAppLevelFiles(pushToServer, tableList.getAppLevelManifestETag(), sc);
       sc.setAppLevelSyncOutcome(SyncOutcome.SUCCESS);
-    } catch (ClientDetectedMissingConfigForClientVersionException e) {
-      try {
-        manifestProcessor.syncAppLevelFiles(!pushToServer, tableList.getAppLevelManifestETag(), sc);
-        sc.setAppLevelSyncOutcome(SyncOutcome.SUCCESS);
-      } catch (Exception e1) {
-        log.e(TAG,
-                "[synchronizeConfigurationAndContent] exception while trying to synchronize app-level files.");
-        sc.setAppLevelSyncOutcome(sc.exceptionEquivalentOutcome(e1));
-        return new ArrayList<TableResource>();
-      }
     } catch (Exception e) {
       // TODO: update a synchronization result to report back to them as well.
       log.e(TAG,
@@ -393,77 +372,7 @@ public class ProcessAppAndTableLevelChanges {
 
     // done with app-level file synchronization
     sc.incMajorSyncStep();
-
-    if (pushToServer) {
-      Set<TableResource> serverTablesToDelete = new HashSet<TableResource>();
-      serverTablesToDelete.addAll(tables);
-      // ///////////////////////////////////////////
-      // / UPDATE SERVER CONTENT
-      // / UPDATE SERVER CONTENT
-      // / UPDATE SERVER CONTENT
-      // / UPDATE SERVER CONTENT
-      // / UPDATE SERVER CONTENT
-      for (String localTableId : localTableIds) {
-        TableResource matchingResource = null;
-        for (TableResource tr : tables) {
-          if (tr.getTableId().equals(localTableId)) {
-            matchingResource = tr;
-            break;
-          }
-        }
-        log.i(TAG, "[synchronizeConfigurationAndContent] synchronizing table " + localTableId);
-
-        // do not sync the framework table
-        if (!localTableId.equals(FormsColumns.COMMON_BASE_FORM_ID)) {
-          TableDefinitionEntry entry;
-          OrderedColumns orderedDefns;
-          try {
-            db = sc.getDatabase();
-            entry = sc.getDatabaseService().getTableDefinitionEntry(sc.getAppName(), db, localTableId);
-            orderedDefns = sc.getDatabaseService().getUserDefinedColumns(sc.getAppName(), db, localTableId);
-          } finally {
-            try {
-              sc.releaseDatabase(db);
-            } finally {
-              db = null;
-            }
-          }
-
-          if (matchingResource != null) {
-            serverTablesToDelete.remove(matchingResource);
-          }
-
-          TableResource updatedResource = synchronizeTableConfigurationAndContent(entry,
-              orderedDefns, matchingResource, true);
-          if (updatedResource != null) {
-            // there were no errors sync'ing the table-level info.
-            // allow client to sync instance-level data...
-            workingListOfTables.add(updatedResource);
-          }
-        }
-
-        sc.updateNotification(SyncProgressState.TABLE_FILES,
-            R.string.sync_table_level_file_sync_complete, new Object[] { localTableId }, 100.0,
-            false);
-        sc.incMajorSyncStep();
-      }
-
-      // TODO: make this configurable?
-      // Generally should not allow this, as it is very dangerous
-      // delete any other tables
-      if (issueDeletes) {
-        for (TableResource tableToDelete : serverTablesToDelete) {
-          try {
-            sc.getSynchronizer().deleteTable(tableToDelete);
-          } catch (Exception e) {
-            log.e(TAG,
-                "[synchronizeConfigurationAndContent] exception while trying to delete tables.");
-            sc.setAppLevelSyncOutcome(sc.exceptionEquivalentOutcome(e));
-            return new ArrayList<TableResource>();
-          }
-        }
-      }
-    } else {
+    if (!pushToServer) {
       // //////////////////////////////////////////
       // MIMIC SERVER CONTENT
       // MIMIC SERVER CONTENT

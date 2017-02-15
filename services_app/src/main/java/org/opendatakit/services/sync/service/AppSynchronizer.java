@@ -373,15 +373,7 @@ public class AppSynchronizer {
         status = finalStatus;
       }
 
-      // stop the in-progress notification and report an overall success/failure
-      final int finalTablesWithProblems = tablesWithProblems;
-      final int finalAttachmentsFailed = attachmentsFailed;
-      new Timer().schedule(new TimerTask() {
-        @Override
-        public void run() {
-          setFinalNotification(status, false, finalTablesWithProblems, finalAttachmentsFailed);
-        }
-      }, 100);
+      setFinalNotification(status, false, tablesWithProblems, attachmentsFailed);
     }
 
   private void verifySettings(SyncNotification syncProgress) {
@@ -508,11 +500,18 @@ public class AppSynchronizer {
         break;
       case
           /** earlier sync ended successfully without conflicts and all row-level attachments sync'd */ SYNC_COMPLETE:
-        if ( onlyVerify ) {
-          syncProgress.clearVerificationNotification();
-        } else {
-          syncProgress.clearNotification(attachmentsFailed);
-        }
+        final boolean finalOnlyVerify = onlyVerify;
+        final int finalAttachmentsFailed = attachmentsFailed;
+        new Timer().schedule(new TimerTask() {
+          @Override
+          public void run() {
+            if ( finalOnlyVerify ) {
+              syncProgress.clearVerificationNotification();
+            } else {
+              syncProgress.clearNotification(finalAttachmentsFailed);
+            }
+          }
+        }, 100);
         break;
       case
           /** earlier sync ended successfully without conflicts but needs row-level attachments sync'd */ SYNC_COMPLETE_PENDING_ATTACHMENTS:
