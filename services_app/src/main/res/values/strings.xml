@@ -182,7 +182,7 @@
     <string name="sync_defer_instance_files">Defer Instance Attachments</string>
     <string name="sync_start_download">Download Forms</string>
     <string name="sync_start_upload">Upload Forms</string>
-    <string name="sync_reset_server">Reset App Server</string>
+    <string name="sync_reset_server">Upload Server Config</string>
     <string name="sync_no_instances_selected">Please select instances in Survey App first</string>
 
     <string name="sync_confirm_change_settings">Confirm Change Settings</string>
@@ -192,9 +192,9 @@
     <string name="sync_choose_account">Please choose an account</string>
     <string name="sync_waiting_auth">Waiting on authentication</string>
 
-    <string name="sync_confirm_reset_app_server">Confirm Reset App Server</string>
-    <string name="sync_reset_app_server_warning">Resetting the App Server will clear all data currently on the server.</string>
-    <string name="sync_reset">Reset</string>
+    <string name="sync_confirm_reset_app_server">Confirm Upload Server Config</string>
+    <string name="sync_reset_app_server_warning">Uploading the Server Config  files will clear configuration currently on the server.</string>
+    <string name="sync_reset">Upload</string>
 
     <string name="sync_other_auth_fail">Authorization request failed %1$s</string>
     <string name="sync_auth_unsuccessful">Please resolve the reported authorization issues and try again.</string>
@@ -232,7 +232,7 @@
     <string name="sync_status_bad_gateway_or_client_config">WiFi Gateway or Configuration Error.\r\nPlease verify the server URL and that your device browser can access your server.</string>
     <string name="sync_status_request_or_protocol_error">Protocol Error.\r\nPlease verify that the server and device are compatible.</string>
     <string name="sync_status_appname_not_supported_by_server">Server is not configured for this appName.\r\nPlease verify server configuration.</string>
-    <string name="sync_status_server_missing_config_files">Server does not have all app-level or table-level configuration for this APK version.\r\nDid you intend to reset the server?</string>
+    <string name="sync_status_server_missing_config_files">Server does not have all app-level or table-level configuration for this APK version.\r\nDid you intend to upload server configuration?</string>
     <string name="sync_status_server_reset_failed_device_has_no_config_files">Device does not have any configuration.\r\nDid you intend to sync to server?</string>
     <string name="sync_status_resync_because_config_has_been_reset_error">Sync was interrupted by another device.\r\nPlease re-start sync.</string>
     <!-- settings screen stuff -->
