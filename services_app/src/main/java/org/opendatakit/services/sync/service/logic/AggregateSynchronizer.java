@@ -59,7 +59,6 @@ import org.opendatakit.logging.WebLogger;
 import org.opendatakit.logging.WebLoggerIf;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.services.forms.RowList;
-import org.opendatakit.services.forms.TableResourceClient;
 import org.opendatakit.services.sync.service.SyncExecutionContext;
 import org.opendatakit.services.sync.service.exceptions.AccessDeniedException;
 import org.opendatakit.services.sync.service.exceptions.BadClientConfigException;
@@ -274,7 +273,7 @@ public class AggregateSynchronizer implements Synchronizer {
     HttpGet request = new HttpGet();
     CloseableHttpResponse response = null;
 
-    URI uri = wrapper.constructListOfTablesUri(webSafeResumeCursor);
+    URI uri = wrapper.constructListOfTablesUri(webSafeResumeCursor, sc.getOfficeId());
 
     wrapper.buildNoContentJsonResponseRequest(uri, request);
 
@@ -295,10 +294,10 @@ public class AggregateSynchronizer implements Synchronizer {
   }
 
   @Override
-  public TableResourceClient getTable(String tableId) throws
+  public TableResource getTable(String tableId) throws
           HttpClientWebException, IOException {
 
-    TableResourceClient tableResource = null;
+    TableResource tableResource = null;
     HttpGet request = new HttpGet();
     CloseableHttpResponse response = null;
 
@@ -311,7 +310,7 @@ public class AggregateSynchronizer implements Synchronizer {
 
       String res = wrapper.convertResponseToString(response);
 
-      tableResource = ODKFileUtils.mapper.readValue(res, TableResourceClient.class);
+      tableResource = ODKFileUtils.mapper.readValue(res, TableResource.class);
 
       return tableResource;
     } finally {
