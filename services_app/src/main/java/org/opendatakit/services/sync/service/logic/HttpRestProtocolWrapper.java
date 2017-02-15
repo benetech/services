@@ -71,6 +71,7 @@ public class HttpRestProtocolWrapper {
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
   public static final String DEVICE_ID = "deviceId";
+  public static final String OFFICE_ID = "officeId";
 
   // parameter for file downloads -- if we want to have it come down as an attachment.
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
@@ -294,21 +295,24 @@ public class HttpRestProtocolWrapper {
    *
    * @return
    */
-  public URI constructListOfTablesUri(String webSafeResumeCursor) {
+  public URI constructListOfTablesUri(String webSafeResumeCursor, String officeId) {
     String tableFrag = getTablesUriFragment();
     tableFrag = tableFrag.substring(0, tableFrag.length() - 1);
     URI uri = normalizeUri(sc.getAggregateUri(), tableFrag);
 
-    if (webSafeResumeCursor != null) {
       try {
-        uri = new URIBuilder(uri.toString())
-            .addParameter(HttpRestProtocolWrapper.CURSOR_PARAMETER, webSafeResumeCursor)
-            .build();
+          if (webSafeResumeCursor != null) {
+              uri = new URIBuilder(uri.toString())
+                      .addParameter(HttpRestProtocolWrapper.CURSOR_PARAMETER, webSafeResumeCursor)
+                      .build();
+          }
+
+          uri = new URIBuilder(uri.toString())
+                  .addParameter(HttpRestProtocolWrapper.OFFICE_ID, officeId).build();
       } catch (URISyntaxException e) {
         log.printStackTrace(e);
         throw new IllegalStateException("this should never happen");
       }
-    }
 
     return uri;
   }
