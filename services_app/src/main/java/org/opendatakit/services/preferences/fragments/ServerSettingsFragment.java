@@ -34,6 +34,7 @@ import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
 import org.opendatakit.services.preferences.PasswordPreferenceScreen;
 import org.opendatakit.services.R;
+import org.opendatakit.services.utilities.SettingsUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,6 +57,7 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
   private ListPreference mSelectedGoogleAccountPreference;
   private EditTextPreference mOfficeId;
   private SharedPreferences prefs;
+  private SettingsUtils settingsUtils;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -280,7 +282,8 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
     }
 
       mOfficeId = (EditTextPreference) findPreference("common.officeID");
-      String officeId = getOfficeIdFromFile();
+    this.settingsUtils = new SettingsUtils(getActivity().getApplicationContext());
+      String officeId = settingsUtils.getOfficeIdFromFile();
       if(officeId != null && !officeId.equals("null")) {
           mOfficeId.setSummary(officeId);
           mOfficeId.setText(officeId);
@@ -342,39 +345,6 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
     return returnFilter;
   }
 
-    private void saveOfficeIdToFile(String value)
-    {
-        try {
-            String filename = "settings.txt";
-            FileOutputStream file = getActivity().getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(file);
-            if(value.equals(""))
-                value = "null";
-            writer.write(value);
-            writer.close();
-            file.close();
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String getOfficeIdFromFile() {
-        try {
-            String filename = "settings.txt";
-            FileInputStream file = getActivity().getApplicationContext().openFileInput(filename);
-            InputStreamReader reader = new InputStreamReader(file);
-            char[] inputBuffer = new char[100];
-            int i = reader.read(inputBuffer);
-            String content = new String(inputBuffer, 0, i);
-            reader.close();
-            file.close();
-            return content;
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
   /**
    * Generic listener that sets the summary to the newly selected/entered value
    */
@@ -387,7 +357,7 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
       props.setProperty(CommonToolProperties.KEY_ROLES_LIST, "");
       props.setProperty(CommonToolProperties.KEY_USERS_LIST, "");
     } else if(preference.getKey().equals("common.officeID")) {
-        saveOfficeIdToFile(newValue.toString());
+        settingsUtils.saveOfficeIdToFile(newValue.toString());
     } else {
       throw new IllegalStateException("Unexpected case");
     }
