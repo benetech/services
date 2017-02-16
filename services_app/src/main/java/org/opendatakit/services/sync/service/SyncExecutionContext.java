@@ -35,6 +35,7 @@ import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
 import org.opendatakit.services.preferences.fragments.ServerSettingsFragment;
+import org.opendatakit.services.utilities.SettingsUtils;
 import org.opendatakit.sync.service.SyncNotification;
 import org.opendatakit.sync.service.SyncOutcome;
 import org.opendatakit.sync.service.SyncOverallResult;
@@ -89,6 +90,7 @@ public class SyncExecutionContext implements SynchronizerStatus {
   private final String deviceId;
 
   private final SyncNotification syncProgress;
+  private SettingsUtils settingsUtils;
 
   // set this later
   private Synchronizer synchronizer;
@@ -114,30 +116,14 @@ public class SyncExecutionContext implements SynchronizerStatus {
     this.googleAccount = props.getProperty(CommonToolProperties.KEY_ACCOUNT);
     this.username = props.getProperty(CommonToolProperties.KEY_USERNAME);
     this.password = props.getProperty(CommonToolProperties.KEY_PASSWORD);
-    this.officeId = getOfficeIdFromFile();
+    this.settingsUtils = new SettingsUtils(context);
+    this.officeId = settingsUtils.getOfficeIdFromFile();
     this.deviceId = Secure.getString(context.getContentResolver(),
               Secure.ANDROID_ID);
 
       this.nMajorSyncSteps = 1;
     this.GRAINS_PER_MAJOR_SYNC_STEP = (OVERALL_PROGRESS_BAR_LENGTH / nMajorSyncSteps);
     this.iMajorSyncStep = 0;
-  }
-
-  private String getOfficeIdFromFile() {
-      try {
-          String filename = "settings.txt";
-          FileInputStream file = application.openFileInput(filename);
-          InputStreamReader reader = new InputStreamReader(file);
-          char[] inputBuffer = new char[100];
-          int i = reader.read(inputBuffer);
-          String content = new String(inputBuffer, 0, i);
-          reader.close();
-          file.close();
-          return content;
-      } catch(IOException e) {
-          e.printStackTrace();
-      }
-      return null;
   }
 
   public void setSynchronizer(Synchronizer synchronizer) {
