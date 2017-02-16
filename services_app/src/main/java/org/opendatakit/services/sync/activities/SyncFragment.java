@@ -34,6 +34,7 @@ import android.widget.*;
 import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
+import org.opendatakit.services.utilities.SettingsUtils;
 import org.opendatakit.sync.service.*;
 import org.opendatakit.logging.WebLogger;
 import org.opendatakit.services.R;
@@ -77,6 +78,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
 
   private SyncAttachmentState syncAttachmentState = SyncAttachmentState.DOWNLOAD;
   private SyncActions syncAction = SyncActions.IDLE;
+  private SettingsUtils settingsUtils;
 
   @Override
   public void onSaveInstanceState(Bundle outState) {
@@ -116,6 +118,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
       }
     }
     disableButtons();
+    this.settingsUtils = new SettingsUtils(getActivity().getApplicationContext());
   }
 
   @Override
@@ -547,14 +550,19 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
   public void onClickSyncNow(View v) {
     WebLogger.getLogger(getAppName()).d(TAG,
         "[" + getId() + "] [onClickSyncNow] timestamp: " + System.currentTimeMillis());
-    if (areCredentialsConfigured()) {
-      if(syncAttachmentState!=SyncAttachmentState.UPLOAD || (getActivity().getIntent().getStringArrayListExtra("ids")!=null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty())) {
-        disableButtons();
-        syncAction = SyncActions.SYNC;
-        prepareForSyncAction();
-      } else {
-        Toast.makeText(getActivity(), R.string.sync_no_instances_selected, Toast.LENGTH_SHORT).show();
-        WebLogger.getLogger(getAppName()).e(TAG, "No instances selected, aborting upload");
+    if(settingsUtils.getOfficeIdFromFile()==null || settingsUtils.getOfficeIdFromFile().equals("null")){
+      Toast.makeText(getActivity(), R.string.sync_no_regional_office_id_set, Toast.LENGTH_SHORT).show();
+      WebLogger.getLogger(getAppName()).e(TAG, "No regional office id set, aborting upload");
+    } else {
+      if (areCredentialsConfigured()) {
+        if (syncAttachmentState != SyncAttachmentState.UPLOAD || (getActivity().getIntent().getStringArrayListExtra("ids") != null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty())) {
+          disableButtons();
+          syncAction = SyncActions.SYNC;
+          prepareForSyncAction();
+        } else {
+          Toast.makeText(getActivity(), R.string.sync_no_instances_selected, Toast.LENGTH_SHORT).show();
+          WebLogger.getLogger(getAppName()).e(TAG, "No instances selected, aborting upload");
+        }
       }
     }
   }
