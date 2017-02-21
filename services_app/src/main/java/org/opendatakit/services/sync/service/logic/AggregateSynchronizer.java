@@ -479,9 +479,9 @@ public class AggregateSynchronizer implements Synchronizer {
     CloseableHttpResponse response = null;
 
     if ((table.getDataETag() == null) || dataETag == null) {
-      uri = wrapper.constructTableDataUri(table.getDataUri(), websafeResumeCursor, fetchLimit, sc.getDeviceId());
+      uri = wrapper.constructTableDataUri(table.getDataUri(), websafeResumeCursor, fetchLimit, sc.getDeviceId(), sc.getOfficeId());
     } else {
-      uri = wrapper.constructTableDataDiffUri(table.getDiffUri(), dataETag, websafeResumeCursor, fetchLimit, sc.getDeviceId());
+      uri = wrapper.constructTableDataDiffUri(table.getDiffUri(), dataETag, websafeResumeCursor, fetchLimit, sc.getDeviceId(), sc.getOfficeId());
     }
 
     wrapper.buildNoContentJsonResponseRequest(uri, request);
@@ -535,6 +535,7 @@ public class AggregateSynchronizer implements Synchronizer {
     }
    RowList rlist = new RowList(rows, resource.getDataETag());
    rlist.setDeviceId(sc.getDeviceId());
+   rlist.setOfficeId(sc.getOfficeId());
 
     HttpPut request = new HttpPut();
     CloseableHttpResponse response = null;

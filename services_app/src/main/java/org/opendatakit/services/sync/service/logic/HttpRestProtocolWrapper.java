@@ -407,7 +407,7 @@ public class HttpRestProtocolWrapper {
   }
 
   public URI constructTableDataUri(String tableIdDataUri, String websafeResumeCursor,
-      int fetchLimit, String deviceId) {
+      int fetchLimit, String deviceId, String officeId) {
     URI uri = URI.create(tableIdDataUri);
 
     try {
@@ -424,6 +424,9 @@ public class HttpRestProtocolWrapper {
 
       uri = new URIBuilder(uri.toString())
               .addParameter(HttpRestProtocolWrapper.DEVICE_ID, deviceId).build();
+
+      uri = new URIBuilder(uri.toString())
+              .addParameter(HttpRestProtocolWrapper.OFFICE_ID, officeId).build();
     } catch (URISyntaxException e) {
       log.printStackTrace(e);
       throw new IllegalStateException("should never be possible");
@@ -433,7 +436,7 @@ public class HttpRestProtocolWrapper {
   }
 
   public URI constructTableDataDiffUri(String tableIdDiffUri, String dataETag, String websafeResumeCursor,
-      int fetchLimit, String deviceId) {
+      int fetchLimit, String deviceId, String officeId) {
 
     URI uri = URI.create(tableIdDiffUri);
 
@@ -449,6 +452,9 @@ public class HttpRestProtocolWrapper {
       }
       uri = new URIBuilder(uri.toString())
               .addParameter(HttpRestProtocolWrapper.DEVICE_ID, deviceId).build();
+
+      uri = new URIBuilder(uri.toString())
+              .addParameter(HttpRestProtocolWrapper.OFFICE_ID, officeId).build();
     } catch (URISyntaxException e) {
       log.printStackTrace(e);
       throw new IllegalStateException("should never be possible");
