@@ -318,6 +318,8 @@
     <string name="admin_tool_tables_settings_summary">Limit non-Admin ability to change Tables-specific Settings</string>
     <string name="change_custom_home_screen">Change use of custom home screen</string>
 
+    <string name="confirm_change_office_id">"Changing Office ID will delete all data. Do you wish to continue?</string>
+
     <string name="clear_configuration_settings">Reset configuration</string>
     <string name="click_to_clear_settings">Click to clear settings</string>
 
