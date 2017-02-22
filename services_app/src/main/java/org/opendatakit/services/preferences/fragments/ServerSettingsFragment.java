@@ -16,11 +16,14 @@ package org.opendatakit.services.preferences.fragments;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.*;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.text.InputFilter;
@@ -28,6 +31,7 @@ import android.text.Spanned;
 import android.widget.Toast;
 
 import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.io.FileUtils;
 import org.opendatakit.consts.IntentConsts;
 import org.opendatakit.services.preferences.activities.IOdkAppPropertiesActivity;
 import org.opendatakit.properties.CommonToolProperties;
@@ -36,6 +40,7 @@ import org.opendatakit.services.preferences.PasswordPreferenceScreen;
 import org.opendatakit.services.R;
 import org.opendatakit.services.utilities.SettingsUtils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -56,7 +61,6 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
   private EditTextPreference mUsernamePreference;
   private ListPreference mSelectedGoogleAccountPreference;
   private EditTextPreference mOfficeId;
-  private SharedPreferences prefs;
   private SettingsUtils settingsUtils;
 
   @Override
@@ -345,19 +349,44 @@ public class ServerSettingsFragment extends PreferenceFragment implements OnPref
     return returnFilter;
   }
 
+  public void createOfficeIdConfirmChangeDialog(final Preference preference, final Object newValue)
+  {
+      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+      builder.setMessage(R.string.confirm_change_office_id);
+      builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+              settingsUtils.deleteAllForms();
+              settingsUtils.saveOfficeIdToFile(newValue.toString());
+              preference.setSummary((CharSequence) newValue);
+              mOfficeId.setText(newValue.toString());
+              dialog.dismiss();
+          }
+      });
+      builder.setCancelable(true);
+      builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+              dialog.cancel();
+          }
+      });
+      builder.create().show();
+  }
+
   /**
    * Generic listener that sets the summary to the newly selected/entered value
    */
   @Override
   public boolean onPreferenceChange(Preference preference, Object newValue) {
     PropertiesSingleton props = ((IOdkAppPropertiesActivity) this.getActivity()).getProps();
-    preference.setSummary((CharSequence) newValue);
     if ( props.containsKey(preference.getKey())) {
+      preference.setSummary((CharSequence) newValue);
       props.setProperty(preference.getKey(), newValue.toString());
       props.setProperty(CommonToolProperties.KEY_ROLES_LIST, "");
       props.setProperty(CommonToolProperties.KEY_USERS_LIST, "");
     } else if(preference.getKey().equals("common.officeID")) {
-        settingsUtils.saveOfficeIdToFile(newValue.toString());
+      createOfficeIdConfirmChangeDialog(preference, newValue);
+      return false;
     } else {
       throw new IllegalStateException("Unexpected case");
     }

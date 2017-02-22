@@ -1,7 +1,16 @@
 package org.opendatakit.services.utilities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Environment;
+import android.preference.EditTextPreference;
+import android.preference.Preference;
 
+import org.apache.commons.io.FileUtils;
+import org.opendatakit.services.R;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,5 +57,18 @@ public class SettingsUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void deleteAllForms()
+    {
+        File tables = new File(Environment.getExternalStorageDirectory() + "/opendatakit/default/config/tables");
+        File data = new File(Environment.getExternalStorageDirectory() + "/opendatakit/default/data");
+        try {
+            FileUtils.cleanDirectory(tables);
+            FileUtils.cleanDirectory(data);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }
