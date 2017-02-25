@@ -28,23 +28,23 @@ import org.apache.commons.io.FileUtils;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.androidlibrary.R;
+import org.opendatakit.database.DatabaseConstants;
 import org.opendatakit.database.data.ColumnDefinition;
 import org.opendatakit.database.data.OrderedColumns;
-import org.opendatakit.services.database.AndroidConnectFactory;
-import org.opendatakit.database.DatabaseConstants;
-import org.opendatakit.services.database.OdkConnectionFactorySingleton;
-import org.opendatakit.services.database.OdkConnectionInterface;
+import org.opendatakit.database.service.DbHandle;
+import org.opendatakit.database.utilities.CursorUtils;
+import org.opendatakit.logging.WebLogger;
 import org.opendatakit.properties.CommonToolProperties;
 import org.opendatakit.properties.PropertiesSingleton;
 import org.opendatakit.provider.DataTableColumns;
 import org.opendatakit.provider.InstanceColumns;
 import org.opendatakit.provider.InstanceProviderAPI;
 import org.opendatakit.provider.KeyValueStoreColumns;
-import org.opendatakit.database.utilities.CursorUtils;
+import org.opendatakit.services.database.AndroidConnectFactory;
+import org.opendatakit.services.database.OdkConnectionFactorySingleton;
+import org.opendatakit.services.database.OdkConnectionInterface;
 import org.opendatakit.services.database.utlities.ODKDatabaseImplUtils;
 import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.logging.WebLogger;
-import org.opendatakit.database.service.DbHandle;
 
 import java.io.File;
 import java.io.IOException;
@@ -149,8 +149,6 @@ public class InstanceProvider extends ContentProvider {
     ODKFileUtils.verifyExternalStorageAvailability();
     ODKFileUtils.assertDirectoryStructure(appName);
     String tableId = segments.get(1);
-    // _ID in UPLOADS_TABLE_NAME
-    String instanceId = (segments.size() == 3 ? segments.get(2) : null);
 
     DbHandle dbHandleName = OdkConnectionFactorySingleton.getOdkConnectionFactoryInterface().generateInternalUseDbHandle();
 
@@ -160,11 +158,8 @@ public class InstanceProvider extends ContentProvider {
       // +1 referenceCount if db is returned (non-null)
       db = OdkConnectionFactorySingleton.getOdkConnectionFactoryInterface().getConnection(appName, dbHandleName);
 
-      internalUpdate(db, uri, appName, tableId);
-
-      Cursor c = internalQuery(db, uri,
-          appName, tableId, instanceId,
-          projection, selection, selectionArgs, sortOrder);
+      Cursor c = db.query(tableId, projection, selection, selectionArgs,
+              null, null, sortOrder, null);
 
       if (c == null) {
         return null;
