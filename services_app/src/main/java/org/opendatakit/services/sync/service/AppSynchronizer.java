@@ -17,10 +17,20 @@ package org.opendatakit.services.sync.service;
 
 import android.app.Service;
 
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.application.AppAwareApplication;
+import org.opendatakit.database.data.ColumnList;
 import org.opendatakit.exception.ServicesAvailabilityException;
+import org.opendatakit.logging.WebLogger;
+import org.opendatakit.services.R;
+import org.opendatakit.services.sync.service.exceptions.InvalidAuthTokenException;
+import org.opendatakit.services.sync.service.exceptions.NoAppNameSpecifiedException;
+import org.opendatakit.services.sync.service.logic.AggregateSynchronizer;
+import org.opendatakit.services.sync.service.logic.ProcessAppAndTableLevelChanges;
 import org.opendatakit.services.sync.service.logic.ProcessRowDataOrchestrateChanges;
+import org.opendatakit.services.sync.service.logic.Synchronizer;
 import org.opendatakit.sync.service.SyncAttachmentState;
 import org.opendatakit.sync.service.SyncNotification;
 import org.opendatakit.sync.service.SyncOutcome;
@@ -30,14 +40,8 @@ import org.opendatakit.sync.service.SyncProgressState;
 import org.opendatakit.sync.service.SyncStatus;
 import org.opendatakit.sync.service.TableLevelResult;
 import org.opendatakit.utilities.ODKFileUtils;
-import org.opendatakit.logging.WebLogger;
-import org.opendatakit.services.R;
-import org.opendatakit.services.sync.service.exceptions.InvalidAuthTokenException;
-import org.opendatakit.services.sync.service.exceptions.NoAppNameSpecifiedException;
-import org.opendatakit.services.sync.service.logic.AggregateSynchronizer;
-import org.opendatakit.services.sync.service.logic.ProcessAppAndTableLevelChanges;
-import org.opendatakit.services.sync.service.logic.Synchronizer;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,6 +49,10 @@ import java.util.TimerTask;
 public class AppSynchronizer {
 
   private static final String TAG = AppSynchronizer.class.getSimpleName();
+  static final String FORM_UUID_COLUMN = "form_uuid";
+  static final String SUBFORM_ID_COLUMN = "subform_id";
+  static final String SUBFORM_TABLE_ID_COLUMN = "subform_table_id";
+  static final String FORM_SUBFORM_PAIRS_TABLE_ID = "form_subform_pairs";
 
   private final Service service;
   private final String appName;
@@ -318,6 +326,17 @@ public class AppSynchronizer {
             }
           }
         }
+        //if it doesn't exist yet, we need to create a table to store form - subform pairs
+        try {
+          List<Column> columns = Arrays.asList(new Column(FORM_UUID_COLUMN, FORM_UUID_COLUMN, ElementDataType.string.name(), "[]"),
+                  new Column(SUBFORM_ID_COLUMN, SUBFORM_ID_COLUMN, ElementDataType.string.name(), "[]"),
+                  new Column(SUBFORM_TABLE_ID_COLUMN, SUBFORM_TABLE_ID_COLUMN, ElementDataType.string.name(), "[]"));
+          ColumnList columnslist = new ColumnList(columns);
+          sharedContext.getDatabaseService().createLocalOnlyTableWithColumns(sharedContext.getAppName(), sharedContext.getDatabase(), FORM_SUBFORM_PAIRS_TABLE_ID, columnslist);
+        } catch (ServicesAvailabilityException e) {
+          e.printStackTrace();
+        }
+
       } catch (InvalidAuthTokenException e) {
         syncResult.setAppLevelSyncOutcome(SyncOutcome.ACCESS_DENIED_REAUTH_EXCEPTION);
         WebLogger.getLogger(appName)
