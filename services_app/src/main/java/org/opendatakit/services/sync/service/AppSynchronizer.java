@@ -52,7 +52,7 @@ public class AppSynchronizer {
   static final String FORM_UUID_COLUMN = "form_uuid";
   static final String SUBFORM_ID_COLUMN = "subform_id";
   static final String SUBFORM_TABLE_ID_COLUMN = "subform_table_id";
-  static final String FORM_SUBFORM_PAIRS_TABLE_ID = "form_subform_pairs";
+  static final String FORM_SUBFORM_PAIRS_TABLE_ID = "_form_subform_pairs";
 
   private final Service service;
   private final String appName;
