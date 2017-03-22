@@ -556,6 +556,7 @@ public class SyncFragment extends Fragment implements ISyncOutcomeHandler {
     } else {
       if (areCredentialsConfigured()) {
         if (syncAttachmentState != SyncAttachmentState.UPLOAD || (getActivity().getIntent().getStringArrayListExtra("ids") != null && !getActivity().getIntent().getStringArrayListExtra("ids").isEmpty())) {
+          // Check if any form to sync contains a subform. If yes add this subform(s) to the list of table ids to be pushed to server
           disableButtons();
           syncAction = SyncActions.SYNC;
           prepareForSyncAction();

@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.odktables.rest.ElementDataType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.application.AppAwareApplication;
+import org.opendatakit.database.data.BaseTable;
 import org.opendatakit.database.data.ColumnList;
 import org.opendatakit.exception.ServicesAvailabilityException;
 import org.opendatakit.logging.WebLogger;
@@ -43,6 +44,7 @@ import org.opendatakit.utilities.ODKFileUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -313,6 +315,7 @@ public class AppSynchronizer {
           // experienced a table-level sync failure in the preceeding step.
 
           try {
+            selectedFormsIds.addAll(fetchSubFormsIds(sharedContext, selectedFormsIds));
             rowDataProcessor.synchronizeDataRowsAndAttachments(workingListOfTables, attachmentState, selectedFormsIds);
           } catch (ServicesAvailabilityException e) {
             WebLogger.getLogger(appName).printStackTrace(e);
@@ -391,8 +394,19 @@ public class AppSynchronizer {
       } else {
         status = finalStatus;
       }
-
       setFinalNotification(status, false, tablesWithProblems, attachmentsFailed);
+    }
+
+    private List<String> fetchSubFormsIds(SyncExecutionContext sharedContext, List<String> selectedFormsIds) {
+
+      try {
+        BaseTable table = sharedContext.getDatabaseService().simpleQueryLocalOnlyTables(sharedContext.getAppName(), sharedContext.getDatabase(), FORM_SUBFORM_PAIRS_TABLE_ID, null, null, null, null, null, null, null, null);
+
+      } catch (ServicesAvailabilityException e) {
+        e.printStackTrace();
+      }
+
+      return null;
     }
 
   private void verifySettings(SyncNotification syncProgress) {
